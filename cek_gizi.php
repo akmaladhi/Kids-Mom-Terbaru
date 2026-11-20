@@ -301,7 +301,10 @@ if ($selectedChild) {
             </form>
 
             <?php if (!$children): ?>
-                <p class="empty-management">Belum ada data anak. Tambahkan data anak dan pengukuran terlebih dahulu.</p>
+                <p class="empty-management">
+                    Belum ada data anak. Tambahkan data anak dan pengukuran terlebih dahulu.
+                    <a class="action-link" href="anak.php">Tambah data anak</a>
+                </p>
             <?php elseif ($selectedChild): ?>
                 <div class="selected-child">
                     <span>Catatan untuk</span>

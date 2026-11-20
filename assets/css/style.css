@@ -560,6 +560,26 @@ h3 {
     line-height: 1.75;
 }
 
+.feature-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    color: var(--pink-dark);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.feature-action:hover {
+    text-decoration: underline;
+}
+
+.feature-action:focus-visible {
+    border-radius: 3px;
+    outline: 2px solid var(--pink);
+    outline-offset: 3px;
+}
+
 .about-section {
     display: grid;
     min-height: 310px;
@@ -719,6 +739,10 @@ h3 {
     .main-nav .button {
         align-self: flex-start;
         margin-top: 7px;
+    }
+
+    .site-back-button {
+        display: none;
     }
 
     .hero {

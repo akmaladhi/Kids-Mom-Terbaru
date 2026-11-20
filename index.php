@@ -24,6 +24,9 @@
             </button>
 
             <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
+                <button class="button button-small button-outline site-back-button" type="button" data-history-back>
+                    <span aria-hidden="true">←</span> Kembali
+                </button>
                 <a href="#fitur">Fitur</a>
                 <a href="#tentang">Tentang</a>
                 <a href="artikel.php">Artikel</a>
@@ -93,16 +96,19 @@
                         <span class="feature-icon icon-pink" aria-hidden="true">♡</span>
                         <h3>Profil Ibu</h3>
                         <p>Simpan informasi dasar ibu dan kelola profil keluarga dengan praktis.</p>
+                        <a class="feature-action" href="profile.php">Kelola profil <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-peach" aria-hidden="true">⌁</span>
                         <h3>Buku KIA Digital</h3>
                         <p>Catat data anak dan pantau riwayat pengukuran tumbuh kembangnya.</p>
+                        <a class="feature-action" href="anak.php">Buka data anak <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-lilac" aria-hidden="true">♡</span>
                         <h3>Pantau Gizi</h3>
                         <p>Lihat indikasi status gizi anak dari data usia, berat, dan tinggi badan.</p>
+                        <a class="feature-action" href="cek_gizi.php">Mulai cek gizi <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-yellow" aria-hidden="true">✿</span>

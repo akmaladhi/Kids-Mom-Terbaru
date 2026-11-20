@@ -1,0 +1,29 @@
+WHO CHILD GROWTH STANDARDS - DATA ATTRIBUTION
+
+Source publication:
+WHO Child Growth Standards: length/height-for-age, weight-for-age,
+weight-for-length, weight-for-height and body mass index-for-age.
+Geneva: World Health Organization; 2006.
+https://www.who.int/publications/i/item/924154693X
+
+Official indicator tables:
+https://www.who.int/tools/child-growth-standards/standards/length-height-for-age
+https://www.who.int/tools/child-growth-standards/standards/weight-for-age
+https://www.who.int/tools/child-growth-standards/standards/weight-for-length-height
+
+The CSV files in this folder are an adaptation of the WHO LMS reference tables.
+Only the L, M, and S columns needed for local z-score calculation are included.
+The files are intended for non-commercial use with attribution. WHO's general
+copyright policy for WHO publications is CC BY-NC-SA 3.0 IGO; the adaptation
+files are shared under CC BY-NC-SA 4.0. Commercial use may require prior
+permission from WHO. See:
+https://www.who.int/about/policies/publishing/copyright
+
+This is an adaptation of an original work "WHO Child Growth Standards:
+length/height-for-age, weight-for-age, weight-for-length, weight-for-height
+and body mass index-for-age. Geneva: World Health Organization (WHO); 2006.
+Licence: CC BY-NC-SA 3.0 IGO". This adaptation was not created by WHO. WHO is
+not responsible for the content or accuracy of this adaptation. The original
+edition shall be the binding and authentic edition.
+
+The calculator is a screening aid, not a medical diagnosis or WHO product.

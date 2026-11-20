@@ -1,0 +1,90 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/includes/auth.php';
+
+$search = trim(is_string($_GET['q'] ?? null) ? $_GET['q'] : '');
+$articlesSql = 'SELECT id, judul, ringkasan, gambar_path, created_at
+                FROM artikel
+                WHERE status = :status';
+$parameters = ['status' => 'published'];
+
+if ($search !== '') {
+    $articlesSql .= ' AND (judul LIKE :judul_search OR ringkasan LIKE :ringkasan_search)';
+    $parameters['judul_search'] = '%' . $search . '%';
+    $parameters['ringkasan_search'] = '%' . $search . '%';
+}
+
+$articlesSql .= ' ORDER BY created_at DESC, id DESC';
+$statement = db()->prepare($articlesSql);
+$statement->execute($parameters);
+$articles = $statement->fetchAll();
+
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel Edukasi | Mom&amp;Kids+</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+<body class="auth-page">
+    <header class="auth-header container">
+        <a class="brand" href="index.php">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+        </a>
+        <div class="profile-header-actions">
+            <a class="auth-back" href="index.php">Beranda</a>
+            <a class="button button-small button-outline" href="login.php">Masuk</a>
+        </div>
+    </header>
+
+    <main class="management-main container">
+        <div class="management-heading">
+            <span class="eyebrow">Bacaan untuk keluarga</span>
+            <h1>Artikel edukasi</h1>
+            <p>Informasi seputar kesehatan ibu, tumbuh kembang, dan gizi anak.</p>
+        </div>
+
+        <form method="get" action="artikel.php" class="article-search">
+            <label class="sr-only" for="q">Cari judul artikel</label>
+            <input id="q" name="q" type="search" maxlength="180"
+                placeholder="Cari artikel..." value="<?php echo escape_html($search); ?>">
+            <button class="button button-primary" type="submit">Cari</button>
+        </form>
+
+        <?php if (!$articles): ?>
+            <p class="empty-management">
+                <?php echo $search === ''
+                    ? 'Belum ada artikel yang dipublikasikan.'
+                    : 'Tidak ada artikel yang cocok dengan pencarian.'; ?>
+            </p>
+        <?php else: ?>
+            <div class="article-grid">
+                <?php foreach ($articles as $article): ?>
+                    <article class="article-card">
+                        <?php if ($article['gambar_path'] !== null): ?>
+                            <a class="article-image" href="baca_artikel.php?id=<?php echo (int) $article['id']; ?>">
+                                <img src="assets/img/<?php echo escape_html($article['gambar_path']); ?>"
+                                    alt="" loading="lazy">
+                            </a>
+                        <?php endif; ?>
+                        <div class="article-card-body">
+                            <span class="article-date"><?php echo escape_html(date('d-m-Y', strtotime($article['created_at']))); ?></span>
+                            <h2><a href="baca_artikel.php?id=<?php echo (int) $article['id']; ?>">
+                                <?php echo escape_html($article['judul']); ?>
+                            </a></h2>
+                            <p><?php echo escape_html($article['ringkasan']); ?></p>
+                            <a class="action-link" href="baca_artikel.php?id=<?php echo (int) $article['id']; ?>">Baca artikel →</a>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </main>
+</body>
+</html>

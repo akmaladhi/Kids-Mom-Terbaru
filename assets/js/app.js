@@ -16,7 +16,7 @@ if (menuToggle && mainNav) {
     });
 }
 
-document.querySelectorAll('.page-back, [data-history-back]').forEach((link) => {
+document.querySelectorAll('[data-history-back]').forEach((link) => {
     link.addEventListener('click', (event) => {
         if (link.classList.contains('page-back-static')) {
             return;
@@ -45,3 +45,34 @@ document.querySelectorAll('form[data-confirm]').forEach((form) => {
         }
     });
 });
+
+const adminSidebarToggle = document.querySelector('.admin-sidebar-toggle');
+const adminSidebar = document.querySelector('#admin-sidebar');
+const adminBackdrop = document.querySelector('[data-sidebar-close]');
+
+if (adminSidebarToggle && adminSidebar) {
+    const closeSidebar = () => {
+        adminSidebarToggle.setAttribute('aria-expanded', 'false');
+        adminSidebar.classList.remove('is-open');
+        if (adminBackdrop) {
+            adminBackdrop.classList.remove('is-open');
+        }
+    };
+
+    adminSidebarToggle.addEventListener('click', () => {
+        const isOpen = adminSidebarToggle.getAttribute('aria-expanded') === 'true';
+        adminSidebarToggle.setAttribute('aria-expanded', String(!isOpen));
+        adminSidebar.classList.toggle('is-open', !isOpen);
+        if (adminBackdrop) {
+            adminBackdrop.classList.toggle('is-open', !isOpen);
+        }
+    });
+
+    if (adminBackdrop) {
+        adminBackdrop.addEventListener('click', closeSidebar);
+    }
+
+    adminSidebar.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeSidebar);
+    });
+}

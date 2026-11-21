@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = $userId;
-                redirect_to('dashboard.php');
+                redirect_to('index.php');
             } catch (Throwable $exception) {
                 if (isset($pdo) && $pdo->inTransaction()) {
                     $pdo->rollBack();
@@ -95,8 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="auth-page">
     <header class="auth-header container">
         <a class="brand" href="index.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+            <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
         </a>
         <a class="button button-small button-outline page-back page-back-static" href="index.php">
             <span aria-hidden="true">←</span> Kembali
@@ -141,6 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="auth-switch">Sudah punya akun? <a href="login.php">Masuk</a></p>
         </section>
     </main>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=2"></script>
 </body>
 </html>

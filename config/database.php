@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-$host = getenv('DB_HOST') ?: 'localhost';
+$host = getenv('DB_HOST') ?: '127.0.0.1';
+$port = getenv('DB_PORT') ?: '3306';
 $database = getenv('DB_NAME') ?: 'momkids_db';
 $username = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASSWORD');
@@ -12,8 +13,9 @@ if ($password === false) {
 }
 
 $dsn = sprintf(
-    'mysql:host=%s;dbname=%s;charset=utf8mb4',
+    'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
     $host,
+    $port,
     $database
 );
 

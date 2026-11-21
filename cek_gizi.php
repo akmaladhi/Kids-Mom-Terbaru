@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/who_growth.php';
+require_once __DIR__ . '/includes/admin_layout.php';
 require_login();
 
 $userId = (int) $_SESSION['user_id'];
-$roleStatement = db()->prepare(
-    'SELECT role FROM users WHERE id = :id LIMIT 1'
-);
-$roleStatement->execute(['id' => $userId]);
-$currentUser = $roleStatement->fetch();
-
+$currentUser = current_user();
 if (!$currentUser) {
-    $_SESSION = [];
-    session_regenerate_id(true);
     redirect_to('login.php');
 }
 
@@ -35,6 +29,7 @@ $children = $childrenStatement->fetchAll();
 $errors = [];
 $selectedChildId = null;
 $selectedChild = null;
+$selectedMeasurementId = null;
 $measurements = [];
 $savedResult = null;
 
@@ -89,6 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             is_string($_POST['pengukuran_id'] ?? null) ? $_POST['pengukuran_id'] : null,
             FILTER_VALIDATE_INT
         );
+        $selectedMeasurementId = ($measurementId !== false && $measurementId >= 1)
+            ? $measurementId
+            : null;
 
         if ($measurementId === false || $measurementId < 1) {
             $errors[] = 'Pilih catatan pengukuran yang akan diperiksa.';
@@ -126,9 +124,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($measurementDate > $latestSupportedDate) {
                 $errors[] = 'Standar WHO yang digunakan hanya mencakup usia sampai 60 bulan.';
             } else {
-                $ageInDays = (int) $birthDate->diff($measurementDate)->format('%a');
+                $ageDiff = $birthDate->diff($measurementDate);
+                $ageInDays = (int) $ageDiff->format('%a');
                 $ageMonths = min(60.0, $ageInDays / 30.4375);
-                $ageMonthsStored = (int) floor($ageMonths);
+                $ageMonthsStored = min(60, ($ageDiff->y * 12) + $ageDiff->m);
 
                 try {
                     $scores = calculate_who_growth_scores(
@@ -137,19 +136,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (float) $measurement['berat_kg'],
                         (float) $measurement['tinggi_cm']
                     );
-                } catch (OutOfRangeException $exception) {
+                } catch (OutOfRangeException | InvalidArgumentException $exception) {
                     $scores = null;
-                    $errors[] = 'Tinggi/panjang badan berada di luar rentang tabel acuan WHO; '
-                        . 'periksa kembali pengukuran bersama tenaga kesehatan.';
+                    $errors[] = 'Data pengukuran berada di luar rentang valid tabel acuan WHO; '
+                        . 'periksa kembali berat, tinggi, dan tanggal pengukuran bersama tenaga kesehatan.';
                 }
 
                 if ($scores !== null) {
                     $heightForAge = $scores['height_for_age'];
                     $weightForAge = $scores['weight_for_age'];
                     $weightForHeight = $scores['weight_for_height'];
-                    $hasLowIndicator = $heightForAge < -2
-                        || $weightForAge < -2
+                    $hasLowWeight = $weightForAge < -2
                         || ($weightForHeight !== null && $weightForHeight < -2);
+                    $hasLowIndicator = $heightForAge < -2 || $hasLowWeight;
                     $status = classify_who_growth($scores);
 
                     $scoreSummary = sprintf(
@@ -164,7 +163,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($heightForAge < -2) {
                         $recommendation = 'Ada indikasi tinggi/panjang badan menurut usia berada di bawah -2 SD. '
                             . 'Konsultasikan hasil pengukuran dengan tenaga kesehatan.';
-                    } elseif ($weightForAge < -2 || ($weightForHeight !== null && $weightForHeight < -2)) {
+                        if ($hasLowWeight) {
+                            $recommendation .= ' Indikator berat badan juga berada di bawah -2 SD.';
+                        }
+                    } elseif ($hasLowWeight) {
                         $recommendation = 'Ada indikator berat badan di bawah rentang skrining WHO. '
                             . 'Konsultasikan hasil pengukuran dengan tenaga kesehatan.';
                     } elseif ($weightForHeight === null) {
@@ -257,27 +259,30 @@ if ($selectedChild) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cek Gizi | Mom&amp;Kids+</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <link rel="stylesheet" href="assets/css/auth.css?v=3">
 </head>
 <body class="auth-page">
-    <header class="auth-header container">
-        <a class="brand" href="dashboard.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
-        </a>
-        <div class="profile-header-actions">
-            <a class="button button-small button-outline page-back" href="dashboard.php">
-                <span aria-hidden="true">←</span> Kembali
+    <?php if ($isAdmin): ?>
+        <?php render_admin_sidebar_start('cek_gizi', $currentUser['nama']); ?>
+    <?php else: ?>
+        <header class="auth-header container">
+            <a class="brand" href="index.php">
+                <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
             </a>
-            <form method="post" action="logout.php">
-                <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
-                <button class="button button-small button-outline" type="submit">Keluar</button>
-            </form>
-        </div>
-    </header>
+            <div class="profile-header-actions">
+                <a class="button button-small button-outline page-back" href="index.php">
+                    <span aria-hidden="true">←</span> Kembali
+                </a>
+                <form method="post" action="logout.php">
+                    <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
+                    <button class="button button-small button-outline" type="submit">Keluar</button>
+                </form>
+            </div>
+        </header>
+    <?php endif; ?>
 
-    <main class="management-main container">
+    <main class="management-main<?php echo $isAdmin ? '' : ' container'; ?>">
         <div class="management-heading">
             <span class="eyebrow">Skrining awal</span>
             <h1>Cek status gizi</h1>
@@ -352,7 +357,8 @@ if ($selectedChild) {
                         <select id="pengukuran_id" name="pengukuran_id" required>
                             <option value="">Pilih tanggal dan ukuran</option>
                             <?php foreach ($measurements as $item): ?>
-                                <option value="<?php echo (int) $item['id']; ?>">
+                                <option value="<?php echo (int) $item['id']; ?>"
+                                    <?php echo $selectedMeasurementId === (int) $item['id'] ? 'selected' : ''; ?>>
                                     <?php echo escape_html(date('d-m-Y', strtotime($item['tanggal_ukur']))); ?>
                                     - <?php echo escape_html((string) $item['berat_kg']); ?> kg
                                     - <?php echo escape_html((string) $item['tinggi_cm']); ?> cm
@@ -404,6 +410,9 @@ if ($selectedChild) {
                 target="_blank" rel="noopener noreferrer">Lihat standar pertumbuhan WHO</a>.
         </p>
     </main>
-    <script src="assets/js/app.js"></script>
+    <?php if ($isAdmin): ?>
+        <?php render_admin_sidebar_end(); ?>
+    <?php endif; ?>
+    <script src="assets/js/app.js?v=3"></script>
 </body>
 </html>

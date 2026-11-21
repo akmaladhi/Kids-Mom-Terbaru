@@ -3,6 +3,13 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
+require_login();
+
+$currentUser = current_user();
+if ($currentUser === null) {
+    redirect_to('login.php');
+}
+$homeUrl = home_url_for_role($currentUser['role']);
 
 $search = trim(is_string($_GET['q'] ?? null) ? $_GET['q'] : '');
 $articlesSql = 'SELECT id, judul, ringkasan, gambar_path, created_at
@@ -33,15 +40,17 @@ $articles = $statement->fetchAll();
 </head>
 <body class="auth-page">
     <header class="auth-header container">
-        <a class="brand" href="index.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+        <a class="brand" href="<?php echo $homeUrl; ?>">
+            <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
         </a>
         <div class="profile-header-actions">
-            <a class="button button-small button-outline page-back" href="index.php">
+            <a class="button button-small button-outline page-back" href="<?php echo $homeUrl; ?>">
                 <span aria-hidden="true">←</span> Kembali
             </a>
-            <a class="button button-small button-outline" href="login.php">Masuk</a>
+            <form method="post" action="logout.php">
+                <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
+                <button class="button button-small button-outline" type="submit">Keluar</button>
+            </form>
         </div>
     </header>
 
@@ -88,6 +97,6 @@ $articles = $statement->fetchAll();
             </div>
         <?php endif; ?>
     </main>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=2"></script>
 </body>
 </html>

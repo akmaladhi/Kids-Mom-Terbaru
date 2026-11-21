@@ -27,13 +27,13 @@ function load_who_lms_reference(string $filename, string $axis): array
     }
 
     try {
-        $header = fgetcsv($handle);
+        $header = fgetcsv($handle, 0, ',', '"', '');
         if ($header !== $expectedHeader) {
             throw new RuntimeException('Format berkas referensi WHO tidak sesuai.');
         }
 
         $rows = [];
-        while (($values = fgetcsv($handle)) !== false) {
+        while (($values = fgetcsv($handle, 0, ',', '"', '')) !== false) {
             if (
                 count($values) !== 4
                 || !is_numeric($values[0])

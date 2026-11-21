@@ -142,12 +142,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="auth-page">
     <header class="auth-header container">
-        <a class="brand" href="dashboard.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+        <a class="brand" href="index.php">
+            <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
         </a>
         <div class="profile-header-actions">
-            <a class="button button-small button-outline page-back" href="dashboard.php">
+            <a class="button button-small button-outline page-back" href="index.php">
                 <span aria-hidden="true">←</span> Kembali
             </a>
             <form method="post" action="logout.php">
@@ -212,6 +211,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </section>
     </main>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=2"></script>
 </body>
 </html>

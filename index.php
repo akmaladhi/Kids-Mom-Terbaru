@@ -1,3 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/includes/auth.php';
+
+$currentUser = current_user();
+$isLoggedIn = $currentUser !== null;
+$isAdmin = $isLoggedIn && $currentUser['role'] === 'admin';
+$featureHref = static function (string $target) use ($isLoggedIn): string {
+    return $isLoggedIn ? $target : 'login.php';
+};
+
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,14 +20,13 @@
     <meta name="theme-color" content="#fff8f8">
     <meta name="description" content="Mom&Kids+ mendampingi ibu memantau tumbuh kembang anak dan menemukan informasi kesehatan keluarga.">
     <title>Mom&Kids+ | Temani Tumbuh Kembang Si Kecil</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
 </head>
 <body>
     <header class="site-header">
         <div class="container header-content">
             <a class="brand" href="#beranda" aria-label="Mom&Kids+, beranda">
-                <span class="brand-mark" aria-hidden="true">M</span>
-                <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+                <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
             </a>
 
             <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
@@ -23,15 +36,38 @@
                 <span></span>
             </button>
 
-            <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
-                <a class="button button-small button-outline site-back-button page-back" href="index.php" data-history-back>
-                    <span aria-hidden="true">←</span> Kembali
-                </a>
-                <a href="#fitur">Fitur</a>
-                <a href="#tentang">Tentang</a>
-                <a href="artikel.php">Artikel</a>
-                <a href="resep.php">Resep</a>
-                <a class="button button-small button-outline" href="login.php">Masuk</a>
+            <nav class="main-nav<?php echo $isLoggedIn ? ' main-nav-auth' : ''; ?>" id="main-nav" aria-label="Navigasi utama">
+                <?php if (!$isLoggedIn): ?>
+                    <a href="#fitur">Fitur</a>
+                    <a href="#tentang">Tentang</a>
+                    <a href="login.php">Artikel</a>
+                    <a href="login.php">Resep</a>
+                    <a class="button button-small button-outline" href="login.php">Masuk</a>
+                <?php elseif ($isAdmin): ?>
+                    <a href="anak.php">Data Anak</a>
+                    <a href="cek_gizi.php">Cek Gizi</a>
+                    <a href="artikel.php">Artikel</a>
+                    <a href="resep.php">Resep</a>
+                    <span class="nav-greeting">Hai Admin, <?php echo escape_html($currentUser['nama']); ?></span>
+                    <a class="button button-small button-primary" href="dashboard.php">Dashboard Admin</a>
+                    <form class="nav-logout-form" method="post" action="logout.php">
+                        <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
+                        <button class="button button-small button-outline" type="submit">Keluar</button>
+                    </form>
+                <?php else: ?>
+                    <a href="profile.php">Profil</a>
+                    <a href="anak.php">Data Anak</a>
+                    <a href="cek_gizi.php">Cek Gizi</a>
+                    <a href="posyandu.php">Posyandu</a>
+                    <a href="konsultasi.php">Tanya Bidan</a>
+                    <a href="artikel.php">Artikel</a>
+                    <a href="resep.php">Resep</a>
+                    <span class="nav-greeting">Hai Ibu, <?php echo escape_html($currentUser['nama']); ?></span>
+                    <form class="nav-logout-form" method="post" action="logout.php">
+                        <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
+                        <button class="button button-small button-outline" type="submit">Keluar</button>
+                    </form>
+                <?php endif; ?>
             </nav>
         </div>
     </header>
@@ -96,38 +132,38 @@
                         <span class="feature-icon icon-pink" aria-hidden="true">♡</span>
                         <h3>Profil Ibu</h3>
                         <p>Simpan informasi dasar ibu dan kelola profil keluarga dengan praktis.</p>
-                        <a class="feature-action" href="profile.php">Kelola profil <span aria-hidden="true">→</span></a>
+                        <a class="feature-action" href="<?php echo $featureHref($isAdmin ? 'admin/ibu.php' : 'profile.php'); ?>">Kelola profil <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-peach" aria-hidden="true">⌁</span>
                         <h3>Buku KIA Digital</h3>
                         <p>Catat data anak dan pantau riwayat pengukuran tumbuh kembangnya.</p>
-                        <a class="feature-action" href="anak.php">Buka data anak <span aria-hidden="true">→</span></a>
+                        <a class="feature-action" href="<?php echo $featureHref('anak.php'); ?>">Buka data anak <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-lilac" aria-hidden="true">♡</span>
                         <h3>Pantau Gizi</h3>
                         <p>Lihat indikasi status gizi anak dari data usia, berat, dan tinggi badan.</p>
-                        <a class="feature-action" href="cek_gizi.php">Mulai cek gizi <span aria-hidden="true">→</span></a>
+                        <a class="feature-action" href="<?php echo $featureHref('cek_gizi.php'); ?>">Mulai cek gizi <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-yellow" aria-hidden="true">✿</span>
                         <h3>Artikel &amp; Resep</h3>
                         <p>Temukan bacaan kesehatan dan inspirasi menu MPASI sesuai usia.</p>
-                        <a class="action-link" href="artikel.php">Baca artikel</a>
-                        <a class="action-link" href="resep.php">Lihat resep</a>
+                        <a class="feature-action" href="<?php echo $featureHref('artikel.php'); ?>">Baca artikel <span aria-hidden="true">→</span></a>
+                        <a class="feature-action" href="<?php echo $featureHref('resep.php'); ?>" style="margin-left: 14px;">Lihat resep <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-pink" aria-hidden="true">♡</span>
                         <h3>Jadwal Posyandu</h3>
                         <p>Lihat kegiatan Posyandu mendatang dan daftar kehadiran dengan mudah.</p>
-                        <a class="feature-action" href="posyandu.php">Lihat jadwal <span aria-hidden="true">→</span></a>
+                        <a class="feature-action" href="<?php echo $featureHref($isAdmin ? 'admin/posyandu.php' : 'posyandu.php'); ?>">Lihat jadwal <span aria-hidden="true">→</span></a>
                     </article>
                     <article class="feature-card">
                         <span class="feature-icon icon-lilac" aria-hidden="true">?</span>
                         <h3>Tanya Bidan</h3>
                         <p>Kirim pertanyaan dan pantau balasan Admin/Bidan melalui konsultasi.</p>
-                        <a class="feature-action" href="konsultasi.php">Kirim pertanyaan <span aria-hidden="true">→</span></a>
+                        <a class="feature-action" href="<?php echo $featureHref($isAdmin ? 'admin/konsultasi.php' : 'konsultasi.php'); ?>">Kirim pertanyaan <span aria-hidden="true">→</span></a>
                     </article>
                 </div>
             </div>
@@ -149,14 +185,13 @@
     <footer class="site-footer">
         <div class="container footer-content">
             <a class="brand footer-brand" href="#beranda">
-                <span class="brand-mark" aria-hidden="true">M</span>
-                <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+                <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
             </a>
             <p>Menemani ibu, mendukung tumbuh kembang si kecil.</p>
             <span class="copyright">&copy; <?php echo date('Y'); ?> Mom&amp;Kids+</span>
         </div>
     </footer>
 
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=2"></script>
 </body>
 </html>

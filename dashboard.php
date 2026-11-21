@@ -3,21 +3,35 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/admin_layout.php';
 require_login();
 
-$statement = db()->prepare(
-    'SELECT nama, email, role FROM users WHERE id = :id LIMIT 1'
-);
-$statement->execute(['id' => $_SESSION['user_id']]);
-$user = $statement->fetch();
-
-if (!$user) {
-    $_SESSION = [];
-    session_regenerate_id(true);
+$user = current_user();
+if ($user === null) {
     redirect_to('login.php');
 }
 
-$roleLabel = $user['role'] === 'admin' ? 'Admin' : 'Ibu';
+if ($user['role'] !== 'admin') {
+    redirect_to('index.php');
+}
+
+$stats = [
+    'ibu' => (int) db()->query('SELECT COUNT(*) FROM users WHERE role = \'user\'')->fetchColumn(),
+    'anak' => (int) db()->query('SELECT COUNT(*) FROM anak')->fetchColumn(),
+    'konsultasi_menunggu' => (int) db()->query('SELECT COUNT(*) FROM konsultasi WHERE status = \'Menunggu\'')->fetchColumn(),
+    'posyandu_mendatang' => (int) db()->query('SELECT COUNT(*) FROM jadwal_posyandu WHERE tanggal >= CURRENT_DATE')->fetchColumn(),
+    'artikel' => (int) db()->query('SELECT COUNT(*) FROM artikel WHERE status = \'published\'')->fetchColumn(),
+    'resep' => (int) db()->query('SELECT COUNT(*) FROM resep WHERE status = \'published\'')->fetchColumn(),
+];
+
+$pendingConsultations = db()->query(
+    'SELECT k.id, k.pertanyaan, k.created_at, u.nama AS nama_ibu
+     FROM konsultasi k
+     JOIN users u ON u.id = k.user_id
+     WHERE k.status = \'Menunggu\'
+     ORDER BY k.created_at DESC, k.id DESC
+     LIMIT 5'
+)->fetchAll();
 
 ?>
 <!DOCTYPE html>
@@ -25,55 +39,92 @@ $roleLabel = $user['role'] === 'admin' ? 'Admin' : 'Ibu';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beranda Akun | Mom&amp;Kids+</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/auth.css">
+    <title>Dashboard Admin | Mom&amp;Kids+</title>
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <link rel="stylesheet" href="assets/css/auth.css?v=3">
 </head>
 <body class="auth-page">
-    <header class="auth-header container">
-        <a class="brand" href="index.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
-        </a>
-        <div class="profile-header-actions">
-            <a class="button button-small button-outline page-back page-back-static" href="index.php">
-                <span aria-hidden="true">←</span> Kembali
-            </a>
-            <form method="post" action="logout.php">
-                <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
-                <button class="button button-small button-outline" type="submit">Keluar</button>
-            </form>
-        </div>
-    </header>
+    <?php render_admin_sidebar_start('dashboard', $user['nama']); ?>
 
-    <main class="auth-main">
-        <section class="auth-card dashboard-card">
-            <span class="eyebrow">Berhasil masuk sebagai <?php echo escape_html($roleLabel); ?></span>
+    <main class="admin-main">
+        <div class="admin-heading">
+            <span class="eyebrow">Ringkasan Admin / Bidan</span>
             <h1>Halo, <?php echo escape_html($user['nama']); ?>!</h1>
-            <p class="auth-intro">
-                Kelola informasi keluarga Anda dan ikuti perjalanan tumbuh kembang si kecil.
-            </p>
-            <div class="dashboard-actions">
-                <a class="button button-primary" href="anak.php">Data anak</a>
-                <a class="button button-outline" href="cek_gizi.php">Cek gizi</a>
-                <a class="button button-outline" href="resep.php">Resep MPASI</a>
-                <?php if ($user['role'] === 'admin'): ?>
-                    <a class="button button-primary" href="admin/ibu.php">Daftar ibu</a>
-                    <a class="button button-outline" href="admin/artikel.php">Kelola artikel</a>
-                    <a class="button button-outline" href="admin/resep.php">Kelola resep</a>
-                    <a class="button button-outline" href="admin/posyandu.php">Kelola Posyandu</a>
-                    <a class="button button-outline" href="admin/konsultasi.php">Konsultasi masuk</a>
-                    <a class="button button-outline" href="admin/laporan.php">Laporan data</a>
-                <?php else: ?>
-                    <a class="button button-primary" href="profile.php">Profil ibu</a>
-                    <a class="button button-outline" href="posyandu.php">Jadwal Posyandu</a>
-                    <a class="button button-outline" href="konsultasi.php">Tanya Bidan</a>
-                <?php endif; ?>
-                <a class="button button-outline" href="artikel.php">Artikel edukasi</a>
-                <a class="button button-outline" href="index.php">Kembali ke beranda</a>
+            <p>Pilih menu di sidebar kiri untuk berpindah antar fitur pengelolaan tanpa perlu kembali ke halaman utama.</p>
+        </div>
+
+        <section class="report-stat-grid admin-overview-grid" aria-label="Ringkasan statistik">
+            <article class="management-card report-stat">
+                <span>Total Ibu terdaftar</span>
+                <strong><?php echo $stats['ibu']; ?></strong>
+                <a class="action-link" href="admin/ibu.php">Lihat daftar ibu →</a>
+            </article>
+            <article class="management-card report-stat">
+                <span>Total data anak</span>
+                <strong><?php echo $stats['anak']; ?></strong>
+                <a class="action-link" href="anak.php">Kelola data anak →</a>
+            </article>
+            <article class="management-card report-stat">
+                <span>Konsultasi menunggu balasan</span>
+                <strong><?php echo $stats['konsultasi_menunggu']; ?></strong>
+                <a class="action-link" href="admin/konsultasi.php">Buka konsultasi →</a>
+            </article>
+            <article class="management-card report-stat">
+                <span>Jadwal Posyandu mendatang</span>
+                <strong><?php echo $stats['posyandu_mendatang']; ?></strong>
+                <a class="action-link" href="admin/posyandu.php">Kelola Posyandu →</a>
+            </article>
+            <article class="management-card report-stat">
+                <span>Artikel dipublikasikan</span>
+                <strong><?php echo $stats['artikel']; ?></strong>
+                <a class="action-link" href="admin/artikel.php">Kelola artikel →</a>
+            </article>
+            <article class="management-card report-stat">
+                <span>Resep dipublikasikan</span>
+                <strong><?php echo $stats['resep']; ?></strong>
+                <a class="action-link" href="admin/resep.php">Kelola resep →</a>
+            </article>
+        </section>
+
+        <section class="management-card nutrition-history">
+            <div class="management-card-heading">
+                <div>
+                    <h2>Pertanyaan Tanya Bidan menunggu balasan</h2>
+                    <p class="management-help">5 pertanyaan terbaru yang belum dijawab.</p>
+                </div>
+                <a class="action-link" href="admin/konsultasi.php">Kelola semua →</a>
             </div>
+
+            <?php if (!$pendingConsultations): ?>
+                <p class="empty-management">Tidak ada konsultasi yang menunggu balasan saat ini.</p>
+            <?php else: ?>
+                <div class="table-wrap">
+                    <table class="mothers-table">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Nama Ibu</th>
+                                <th>Pertanyaan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pendingConsultations as $item): ?>
+                                <tr>
+                                    <td><?php echo escape_html(date('d-m-Y H:i', strtotime($item['created_at']))); ?></td>
+                                    <td><?php echo escape_html($item['nama_ibu']); ?></td>
+                                    <td class="table-excerpt"><?php echo escape_html($item['pertanyaan']); ?></td>
+                                    <td><a class="action-link" href="admin/konsultasi.php">Balas →</a></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </section>
     </main>
-    <script src="assets/js/app.js"></script>
+
+    <?php render_admin_sidebar_end(); ?>
+    <script src="assets/js/app.js?v=3"></script>
 </body>
 </html>

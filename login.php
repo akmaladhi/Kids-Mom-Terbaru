@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'Email atau kata sandi tidak benar.';
         } else {
             $statement = db()->prepare(
-                'SELECT id, password_hash FROM users WHERE email = :email LIMIT 1'
+                'SELECT id, password_hash, role FROM users WHERE email = :email LIMIT 1'
             );
             $statement->execute(['email' => $email]);
             $user = $statement->fetch();
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 session_regenerate_id(true);
                 $_SESSION['user_id'] = (int) $user['id'];
-                redirect_to('dashboard.php');
+                redirect_to(home_url_for_role($user['role']));
             }
         }
     }
@@ -68,8 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="auth-page">
     <header class="auth-header container">
         <a class="brand" href="index.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
+            <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
         </a>
         <a class="button button-small button-outline page-back page-back-static" href="index.php">
             <span aria-hidden="true">←</span> Kembali
@@ -113,6 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
         </section>
     </main>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=2"></script>
 </body>
 </html>

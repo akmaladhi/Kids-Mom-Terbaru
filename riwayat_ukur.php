@@ -3,18 +3,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/admin_layout.php';
 require_login();
 
 $userId = (int) $_SESSION['user_id'];
-$roleStatement = db()->prepare(
-    'SELECT role FROM users WHERE id = :id LIMIT 1'
-);
-$roleStatement->execute(['id' => $userId]);
-$currentUser = $roleStatement->fetch();
-
+$currentUser = current_user();
 if (!$currentUser) {
-    $_SESSION = [];
-    session_regenerate_id(true);
     redirect_to('login.php');
 }
 
@@ -152,8 +146,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
         }
 
-        if (!is_valid_non_future_date($measurementForm['tanggal_ukur'])) {
-            $errors[] = 'Masukkan tanggal pengukuran yang valid dan tidak di masa depan.';
+        if (!is_valid_non_future_date($measurementForm['tanggal_ukur'], 2000)) {
+            $errors[] = 'Masukkan tanggal pengukuran yang valid (minimal tahun 2000 dan tidak di masa depan).';
+        } elseif (
+            is_valid_non_future_date($child['tanggal_lahir'], 2000)
+            && $measurementForm['tanggal_ukur'] < $child['tanggal_lahir']
+        ) {
+            $errors[] = 'Tanggal pengukuran tidak boleh sebelum tanggal lahir anak.';
         }
 
         $parseMeasurementValue = static function (string $value): ?float {
@@ -240,27 +239,30 @@ $measurements = $historyStatement->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pengukuran | Mom&amp;Kids+</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=2">
+    <link rel="stylesheet" href="assets/css/auth.css?v=3">
 </head>
 <body class="auth-page">
-    <header class="auth-header container">
-        <a class="brand" href="dashboard.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
-        </a>
-        <div class="profile-header-actions">
-            <a class="button button-small button-outline page-back" href="anak.php">
-                <span aria-hidden="true">←</span> Kembali
+    <?php if ($isAdmin): ?>
+        <?php render_admin_sidebar_start('anak', $currentUser['nama']); ?>
+    <?php else: ?>
+        <header class="auth-header container">
+            <a class="brand" href="index.php">
+                <img class="brand-logo" src="assets/img/LOGO%20Mom%26Kids%2B-3.png" alt="Mom&amp;Kids+">
             </a>
-            <form method="post" action="logout.php">
-                <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
-                <button class="button button-small button-outline" type="submit">Keluar</button>
-            </form>
-        </div>
-    </header>
+            <div class="profile-header-actions">
+                <a class="button button-small button-outline page-back" href="anak.php">
+                    <span aria-hidden="true">←</span> Kembali
+                </a>
+                <form method="post" action="logout.php">
+                    <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
+                    <button class="button button-small button-outline" type="submit">Keluar</button>
+                </form>
+            </div>
+        </header>
+    <?php endif; ?>
 
-    <main class="management-main container">
+    <main class="management-main<?php echo $isAdmin ? '' : ' container'; ?>">
         <div class="management-heading">
             <span class="eyebrow">Buku KIA digital</span>
             <h1>Pengukuran <?php echo escape_html($child['nama']); ?></h1>
@@ -298,8 +300,12 @@ $measurements = $historyStatement->fetchAll();
                     <input type="hidden" name="pengukuran_id"
                         value="<?php echo $editingMeasurementId === null ? '' : (int) $editingMeasurementId; ?>">
 
+                    <?php $minMeasureDate = is_valid_non_future_date($child['tanggal_lahir'], 2000)
+                        ? $child['tanggal_lahir']
+                        : '2000-01-01'; ?>
                     <label for="tanggal_ukur">Tanggal ukur</label>
-                    <input id="tanggal_ukur" name="tanggal_ukur" type="date" max="<?php echo date('Y-m-d'); ?>"
+                    <input id="tanggal_ukur" name="tanggal_ukur" type="date"
+                        min="<?php echo escape_html($minMeasureDate); ?>" max="<?php echo date('Y-m-d'); ?>"
                         required value="<?php echo escape_html($measurementForm['tanggal_ukur']); ?>">
 
                     <label for="berat_kg">Berat badan (kg)</label>
@@ -380,6 +386,9 @@ $measurements = $historyStatement->fetchAll();
             </section>
         </div>
     </main>
-    <script src="assets/js/app.js"></script>
+    <?php if ($isAdmin): ?>
+        <?php render_admin_sidebar_end(); ?>
+    <?php endif; ?>
+    <script src="assets/js/app.js?v=3"></script>
 </body>
 </html>

@@ -55,17 +55,50 @@ function redirect_to(string $location): void
     exit;
 }
 
+function current_user(): ?array
+{
+    if (!isset($_SESSION['user_id'])) {
+        return null;
+    }
+
+    $statement = db()->prepare(
+        'SELECT id, nama, email, role FROM users WHERE id = :id LIMIT 1'
+    );
+    $statement->execute(['id' => (int) $_SESSION['user_id']]);
+    $user = $statement->fetch();
+
+    if (!$user) {
+        $_SESSION = [];
+        session_regenerate_id(true);
+        return null;
+    }
+
+    return $user;
+}
+
+function home_url_for_role(?string $role): string
+{
+    return $role === 'admin' ? 'dashboard.php' : 'index.php';
+}
+
 function redirect_if_authenticated(): void
 {
-    if (isset($_SESSION['user_id'])) {
-        redirect_to('dashboard.php');
+    $user = current_user();
+    if ($user !== null) {
+        redirect_to(home_url_for_role($user['role']));
     }
 }
 
 function require_login(): void
 {
     if (!isset($_SESSION['user_id'])) {
-        redirect_to('login.php');
+        $scriptName = is_string($_SERVER['SCRIPT_NAME'] ?? null)
+            ? $_SERVER['SCRIPT_NAME']
+            : '';
+        $loginPath = str_contains($scriptName, '/admin/')
+            ? '../login.php'
+            : 'login.php';
+        redirect_to($loginPath);
     }
 }
 
@@ -78,8 +111,12 @@ function is_localhost_request(): bool
     return in_array($remoteAddress, ['127.0.0.1', '::1', '::ffff:127.0.0.1'], true);
 }
 
-function is_valid_non_future_date(string $value): bool
+function is_valid_non_future_date(string $value, int $minYear = 1900): bool
 {
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/D', $value) !== 1) {
+        return false;
+    }
+
     $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
     $dateErrors = DateTimeImmutable::getLastErrors();
 
@@ -87,5 +124,6 @@ function is_valid_non_future_date(string $value): bool
         && ($dateErrors === false
             || ($dateErrors['warning_count'] === 0 && $dateErrors['error_count'] === 0))
         && $date->format('Y-m-d') === $value
+        && (int) $date->format('Y') >= $minYear
         && $date <= new DateTimeImmutable('today');
 }

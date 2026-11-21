@@ -6,9 +6,8 @@ Website pendamping ibu dan anak berbasis PHP, MySQL, HTML, CSS, dan JavaScript u
 
 1. Salin folder proyek ke `D:\xampp\htdocs\webRES`.
 2. Jalankan Apache dan MySQL dari XAMPP Control Panel.
-3. Buat database `momkids_db`, lalu impor `database/momkids.sql` melalui phpMyAdmin.
-4. Jika database sudah dipakai, impor migrasi `database/migrations/add_modules_7_9.sql` melalui phpMyAdmin.
-5. Buka `http://localhost/webRES/`.
+3. Impor satu file saja: `database/momkids.sql` melalui phpMyAdmin atau TablePlus (sudah mencakup pembuatan database `momkids_db`, seluruh tabel Modul 1–9, serta data awal jadwal Posyandu, artikel edukasi, dan resep MPASI).
+4. Buka `http://localhost/webRES/`.
 6. Sebelum Admin pertama tersedia, buka `http://localhost/webRES/login.php` dari komputer yang menjalankan XAMPP, lalu pilih **Buat akun Admin lokal**. Setup ini hanya tersedia dari localhost, mensyaratkan kata sandi minimal 12 karakter, dan terkunci setelah Admin pertama dibuat.
 7. Daftar akun Ibu dari halaman **Daftar**, lalu masuk untuk menggunakan fitur keluarga.
 

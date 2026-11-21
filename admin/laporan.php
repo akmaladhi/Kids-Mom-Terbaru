@@ -3,17 +3,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/admin_layout.php';
 require_login();
 
-$userStatement = db()->prepare(
-    'SELECT role FROM users WHERE id = :id LIMIT 1'
-);
-$userStatement->execute(['id' => $_SESSION['user_id']]);
-$currentUser = $userStatement->fetch();
-
+$currentUser = current_user();
 if (!$currentUser) {
-    $_SESSION = [];
-    session_regenerate_id(true);
     redirect_to('../login.php');
 }
 
@@ -67,8 +61,8 @@ $recentChecks = $recentStatement->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan | Mom&amp;Kids+</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/auth.css">
+    <link rel="stylesheet" href="../assets/css/style.css?v=2">
+    <link rel="stylesheet" href="../assets/css/auth.css?v=3">
     <style>
         @media print {
             .auth-header,
@@ -95,23 +89,9 @@ $recentChecks = $recentStatement->fetchAll();
     </style>
 </head>
 <body class="auth-page">
-    <header class="auth-header container">
-        <a class="brand" href="../dashboard.php">
-            <span class="brand-mark" aria-hidden="true">M</span>
-            <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
-        </a>
-        <div class="profile-header-actions">
-            <a class="button button-small button-outline page-back" href="../dashboard.php">
-                <span aria-hidden="true">←</span> Kembali
-            </a>
-            <form method="post" action="../logout.php">
-                <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
-                <button class="button button-small button-outline" type="submit">Keluar</button>
-            </form>
-        </div>
-    </header>
+    <?php render_admin_sidebar_start('laporan', $currentUser['nama'], '../'); ?>
 
-    <main class="admin-main container">
+    <main class="admin-main">
         <div class="management-card-heading">
             <div class="admin-heading">
                 <span class="eyebrow">Ringkasan Mom&amp;Kids+</span>
@@ -179,6 +159,7 @@ $recentChecks = $recentStatement->fetchAll();
             </p>
         </section>
     </main>
-    <script src="../assets/js/app.js"></script>
+    <?php render_admin_sidebar_end(); ?>
+    <script src="../assets/js/app.js?v=3"></script>
 </body>
 </html>

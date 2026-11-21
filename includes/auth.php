@@ -69,6 +69,15 @@ function require_login(): void
     }
 }
 
+function is_localhost_request(): bool
+{
+    $remoteAddress = is_string($_SERVER['REMOTE_ADDR'] ?? null)
+        ? $_SERVER['REMOTE_ADDR']
+        : '';
+
+    return in_array($remoteAddress, ['127.0.0.1', '::1', '::ffff:127.0.0.1'], true);
+}
+
 function is_valid_non_future_date(string $value): bool
 {
     $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);

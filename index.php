@@ -24,9 +24,9 @@
             </button>
 
             <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
-                <button class="button button-small button-outline site-back-button" type="button" data-history-back>
+                <a class="button button-small button-outline site-back-button page-back" href="index.php" data-history-back>
                     <span aria-hidden="true">←</span> Kembali
-                </button>
+                </a>
                 <a href="#fitur">Fitur</a>
                 <a href="#tentang">Tentang</a>
                 <a href="artikel.php">Artikel</a>
@@ -116,6 +116,18 @@
                         <p>Temukan bacaan kesehatan dan inspirasi menu MPASI sesuai usia.</p>
                         <a class="action-link" href="artikel.php">Baca artikel</a>
                         <a class="action-link" href="resep.php">Lihat resep</a>
+                    </article>
+                    <article class="feature-card">
+                        <span class="feature-icon icon-pink" aria-hidden="true">♡</span>
+                        <h3>Jadwal Posyandu</h3>
+                        <p>Lihat kegiatan Posyandu mendatang dan daftar kehadiran dengan mudah.</p>
+                        <a class="feature-action" href="posyandu.php">Lihat jadwal <span aria-hidden="true">→</span></a>
+                    </article>
+                    <article class="feature-card">
+                        <span class="feature-icon icon-lilac" aria-hidden="true">?</span>
+                        <h3>Tanya Bidan</h3>
+                        <p>Kirim pertanyaan dan pantau balasan Admin/Bidan melalui konsultasi.</p>
+                        <a class="feature-action" href="konsultasi.php">Kirim pertanyaan <span aria-hidden="true">→</span></a>
                     </article>
                 </div>
             </div>

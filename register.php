@@ -98,7 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="brand-mark" aria-hidden="true">M</span>
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
-        <a class="auth-back" href="index.php">← Kembali ke beranda</a>
+        <a class="button button-small button-outline page-back page-back-static" href="index.php">
+            <span aria-hidden="true">←</span> Kembali
+        </a>
     </header>
 
     <main class="auth-main">
@@ -139,5 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="auth-switch">Sudah punya akun? <a href="login.php">Masuk</a></p>
         </section>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

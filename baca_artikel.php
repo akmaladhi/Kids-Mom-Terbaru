@@ -40,7 +40,9 @@ if (!$article) {
             <span class="brand-mark" aria-hidden="true">M</span>
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
-        <a class="auth-back" href="artikel.php">← Kembali ke artikel</a>
+        <a class="button button-small button-outline page-back" href="artikel.php">
+            <span aria-hidden="true">←</span> Kembali
+        </a>
     </header>
 
     <main class="article-reader container">
@@ -55,5 +57,6 @@ if (!$article) {
             <div class="article-content"><?php echo nl2br(escape_html($article['konten'])); ?></div>
         </article>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

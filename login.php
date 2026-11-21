@@ -5,6 +5,15 @@ declare(strict_types=1);
 require_once __DIR__ . '/includes/auth.php';
 redirect_if_authenticated();
 
+$adminSetupAvailable = is_localhost_request()
+    && (int) db()->query(
+        'SELECT COUNT(*) FROM users WHERE role = \'admin\''
+    )->fetchColumn() === 0;
+$setupSuccess = is_string($_SESSION['setup_admin_success'] ?? null)
+    ? $_SESSION['setup_admin_success']
+    : null;
+unset($_SESSION['setup_admin_success']);
+
 $errors = [];
 $email = '';
 
@@ -62,7 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="brand-mark" aria-hidden="true">M</span>
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
-        <a class="auth-back" href="index.php">← Kembali ke beranda</a>
+        <a class="button button-small button-outline page-back page-back-static" href="index.php">
+            <span aria-hidden="true">←</span> Kembali
+        </a>
     </header>
 
     <main class="auth-main">
@@ -70,6 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span class="eyebrow">Senang bertemu kembali</span>
             <h1 id="login-title">Masuk ke akun</h1>
             <p class="auth-intro">Lanjutkan perjalanan tumbuh kembang keluarga Anda.</p>
+
+            <?php if ($setupSuccess !== null): ?>
+                <div class="form-success" role="status"><?php echo escape_html($setupSuccess); ?></div>
+            <?php endif; ?>
 
             <?php if ($errors): ?>
                 <div class="form-errors" role="alert">
@@ -93,7 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
 
             <p class="auth-switch">Belum punya akun? <a href="register.php">Daftar sebagai Ibu</a></p>
+            <?php if ($adminSetupAvailable): ?>
+                <p class="auth-switch">Admin pertama? <a href="setup_admin.php">Buat akun Admin lokal</a></p>
+            <?php endif; ?>
         </section>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

@@ -35,10 +35,15 @@ $roleLabel = $user['role'] === 'admin' ? 'Admin' : 'Ibu';
             <span class="brand-mark" aria-hidden="true">M</span>
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
-        <form method="post" action="logout.php">
-            <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
-            <button class="button button-small button-outline" type="submit">Keluar</button>
-        </form>
+        <div class="profile-header-actions">
+            <a class="button button-small button-outline page-back page-back-static" href="index.php">
+                <span aria-hidden="true">←</span> Kembali
+            </a>
+            <form method="post" action="logout.php">
+                <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
+                <button class="button button-small button-outline" type="submit">Keluar</button>
+            </form>
+        </div>
     </header>
 
     <main class="auth-main">
@@ -56,13 +61,19 @@ $roleLabel = $user['role'] === 'admin' ? 'Admin' : 'Ibu';
                     <a class="button button-primary" href="admin/ibu.php">Daftar ibu</a>
                     <a class="button button-outline" href="admin/artikel.php">Kelola artikel</a>
                     <a class="button button-outline" href="admin/resep.php">Kelola resep</a>
+                    <a class="button button-outline" href="admin/posyandu.php">Kelola Posyandu</a>
+                    <a class="button button-outline" href="admin/konsultasi.php">Konsultasi masuk</a>
+                    <a class="button button-outline" href="admin/laporan.php">Laporan data</a>
                 <?php else: ?>
                     <a class="button button-primary" href="profile.php">Profil ibu</a>
+                    <a class="button button-outline" href="posyandu.php">Jadwal Posyandu</a>
+                    <a class="button button-outline" href="konsultasi.php">Tanya Bidan</a>
                 <?php endif; ?>
                 <a class="button button-outline" href="artikel.php">Artikel edukasi</a>
                 <a class="button button-outline" href="index.php">Kembali ke beranda</a>
             </div>
         </section>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

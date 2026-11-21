@@ -147,7 +147,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
         <div class="profile-header-actions">
-            <a class="auth-back" href="dashboard.php">Dashboard</a>
+            <a class="button button-small button-outline page-back" href="dashboard.php">
+                <span aria-hidden="true">←</span> Kembali
+            </a>
             <form method="post" action="logout.php">
                 <input type="hidden" name="csrf_token" value="<?php echo escape_html(csrf_token()); ?>">
                 <button class="button button-small button-outline" type="submit">Keluar</button>
@@ -210,5 +212,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </section>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

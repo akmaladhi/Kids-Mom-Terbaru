@@ -38,7 +38,9 @@ $articles = $statement->fetchAll();
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
         <div class="profile-header-actions">
-            <a class="auth-back" href="index.php">Beranda</a>
+            <a class="button button-small button-outline page-back" href="index.php">
+                <span aria-hidden="true">←</span> Kembali
+            </a>
             <a class="button button-small button-outline" href="login.php">Masuk</a>
         </div>
     </header>
@@ -86,5 +88,6 @@ $articles = $statement->fetchAll();
             </div>
         <?php endif; ?>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

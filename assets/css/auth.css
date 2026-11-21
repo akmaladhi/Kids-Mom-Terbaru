@@ -30,6 +30,11 @@
     gap: 20px;
 }
 
+.page-back {
+    gap: 6px;
+    white-space: nowrap;
+}
+
 .auth-main {
     display: grid;
     min-height: calc(100vh - 82px);
@@ -341,6 +346,86 @@
 .health-disclaimer a {
     color: var(--pink-dark);
     font-weight: 700;
+}
+
+.registration-status {
+    display: inline-flex;
+    padding: 8px 11px;
+    border-radius: 999px;
+    color: #356b4b;
+    background: #f0fbf4;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.consultation-list {
+    display: grid;
+    gap: 16px;
+}
+
+.consultation-item h3 {
+    margin: 15px 0 7px;
+    font-size: 15px;
+}
+
+.consultation-item time {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.consultation-answer {
+    padding: 13px;
+    border-radius: 10px;
+    background: #f7fbf8;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-waiting {
+    color: #8a641c;
+    background: #fff7df;
+}
+
+.status-answered {
+    color: #356b4b;
+    background: #f0fbf4;
+}
+
+.report-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.report-stat {
+    display: flex;
+    min-height: 135px;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.report-stat span {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.report-stat strong {
+    color: var(--pink-dark);
+    font-family: 'Nunito', sans-serif;
+    font-size: 34px;
+    line-height: 1;
+}
+
+.report-note {
+    margin-top: 15px;
 }
 
 .article-search {
@@ -678,6 +763,10 @@
 @media (max-width: 640px) {
     .auth-header {
         min-height: 72px;
+        flex-wrap: wrap;
+        row-gap: 8px;
+        padding-top: 8px;
+        padding-bottom: 8px;
     }
 
     .auth-back {
@@ -685,7 +774,17 @@
     }
 
     .profile-header-actions {
-        gap: 11px;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .page-back,
+    .profile-header-actions .button {
+        min-height: 36px;
+        padding-right: 10px;
+        padding-left: 10px;
+        font-size: 11px;
     }
 
     .auth-main {
@@ -746,5 +845,14 @@
 
     .management-card {
         padding: 18px;
+    }
+
+    .report-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .management-card-heading {
+        align-items: flex-start;
+        gap: 12px;
     }
 }

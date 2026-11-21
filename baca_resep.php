@@ -40,7 +40,9 @@ if (!$recipe) {
             <span class="brand-mark" aria-hidden="true">M</span>
             <span>Mom&amp;Kids<span class="brand-plus">+</span></span>
         </a>
-        <a class="auth-back" href="resep.php">← Kembali ke katalog</a>
+        <a class="button button-small button-outline page-back" href="resep.php">
+            <span aria-hidden="true">←</span> Kembali
+        </a>
     </header>
 
     <main class="article-reader container recipe-reader">
@@ -66,5 +68,6 @@ if (!$recipe) {
             </p>
         </article>
     </main>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>
